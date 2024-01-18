@@ -18,7 +18,7 @@ def write_file(row):
     with open(fpath1, "w") as f:
         f.write(row["before"])
 
-    if row["dataset"] == "bigvul":
+    if row["dataset"] == "bigvul" or row["dataset"] == "anolis":
         savedir_after = svd.get_dir(svd.processed_dir() / row["dataset"] / "after")
         fpath2 = savedir_after / f"{row['id']}.c"
         if len(row["diff"]) > 0:
@@ -51,6 +51,8 @@ def preprocess(row, fn):
 
         # Run Joern on "after" code
         if args.overwrite or (row["dataset"] == "bigvul" and len(row["diff"]) > 0 and not os.path.exists(f"{fpath2}.edges.json")):
+            fn(filepath=fpath2, verbose=args.verbose)
+        elif row["dataset"] == "anolis" and len(row["diff"]) > 0 and not os.path.exists(f"{fpath2}.edges.json"):
             fn(filepath=fpath2, verbose=args.verbose)
         elif args.verbose > 0:
             print("skipping", fpath2)

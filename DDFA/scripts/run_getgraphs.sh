@@ -18,4 +18,5 @@ else
 fi
 
 # Start singularity instance
-python -u sastvd/scripts/getgraphs.py bigvul --sess $jan --num_jobs 100 --overwrite $@
+# python -u sastvd/scripts/getgraphs.py bigvul --sess $jan --num_jobs 100 --overwrite $@
+python -u sastvd/scripts/getgraphs.py anolis --sess $jan --num_jobs 100 --overwrite $@

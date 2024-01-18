@@ -129,11 +129,87 @@ def mutated(subdataset, cache=True, sample=False):
 def ds(dsname, cache=True, sample=False):
     if dsname == "bigvul":
         return bigvul(cache=cache, sample=sample)
+    elif dsname == "anolis":
+        return anolis()
     elif dsname == "devign":
         return devign(cache=cache, sample=sample)
     elif "mutated" in dsname:
         subdataset = dsname.split("_", maxsplit=1)[1]
         return mutated(subdataset, cache=cache, sample=sample)
+
+def anolis():
+    """
+    Read Anolis dataset from CSV
+    """
+    csv_path = "/home/fdse/dwt/DeepDFA/data_conversion/test_data_clean.csv"
+    df = pd.read_csv(
+        csv_path,
+        dtype = {
+            "Unnamed: 0": int,
+            "CVE ID": str,
+            "add_lines": int,
+            "del_lines": int,
+            "func_after": str,
+            "func_before": str,
+            "patch": str,
+            "vul": int,
+        },
+    )
+    df = df.rename(columns={"Unnamed: 0": "id"})
+    df["dataset"] = "anolis"
+
+    # Remove comments
+    df["func_before"] = svd.dfmp(df, remove_comments, "func_before", cs=500)
+    df["func_after"] = svd.dfmp(df, remove_comments, "func_after", cs=500)
+
+    # Save codediffs
+    svd.dfmp(
+        df,
+        svdg._c2dhelper,
+        columns=["func_before", "func_after", "id", "dataset"],
+        ordr=False,
+        cs=300,
+    )
+
+    # Assign info and save
+    df["info"] = svd.dfmp(df, svdg.allfunc, cs=500)
+    df = pd.concat([df, pd.json_normalize(df["info"])], axis=1)
+
+    # POST PROCESSING
+    dfv = df[df.vul == 1]
+    # No added or removed but vulnerable
+    dfv = dfv[~dfv.apply(lambda x: len(x.added) == 0 and len(x.removed) == 0, axis=1)]
+    # Remove functions with abnormal ending (no } or ;)
+    dfv = dfv[
+        ~dfv.apply(
+            lambda x: x.func_before.strip()[-1] != "}"
+            and x.func_before.strip()[-1] != ";",
+            axis=1,
+        )
+    ]
+    dfv = dfv[
+        ~dfv.apply(
+            lambda x: x.func_after.strip()[-1] != "}" and x.after.strip()[-1:] != ";",
+            axis=1,
+        )
+    ]
+    # Remove functions with abnormal ending (ending with ");")
+    dfv = dfv[~dfv.before.apply(lambda x: x[-2:] == ");")]
+
+    # Remove samples with mod_prop > 0.5
+    dfv["mod_prop"] = dfv.apply(
+        lambda x: len(x.added + x.removed) / len(x["diff"].splitlines()), axis=1
+    )
+    dfv = dfv.sort_values("mod_prop", ascending=0)
+    dfv = dfv[dfv.mod_prop < 0.7]
+    # Remove functions that are too short
+    dfv = dfv[dfv.apply(lambda x: len(x.before.splitlines()) > 5, axis=1)]
+    # Filter by post-processing filtering
+    keep_vuln = set(dfv["id"].tolist())
+    df = df[(df.vul == 0) | (df["id"].isin(keep_vuln))].copy()
+
+    return df
+
 
 
 def bigvul(cache=True, sample=False):
