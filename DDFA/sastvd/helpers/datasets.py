@@ -558,9 +558,7 @@ def ds_partition(
 
     # add no partition: all is for test.
     if split == "test":
-        df["label"]="test"
-        return df
-    
+        df["label"]="test"    
     elif split == "random":
         logger.debug("generating random splits with seed %d", seed)
         splits_map = get_splits_map(dsname)

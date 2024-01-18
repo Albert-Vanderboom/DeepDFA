@@ -3,6 +3,6 @@ data:
   gtype: cfg
   dsname: anolis
   undersample: v1.0
-  split: fixed
+  split: test
   train_workers: 1
   batch_size: 256

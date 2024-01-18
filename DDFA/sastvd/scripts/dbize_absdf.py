@@ -23,6 +23,8 @@ for limitall in [1, 10, 100, 500, 1000, 5000, 10000]:
         my_node_df = node_dfs.copy()
         limitsubkeys = limitall
         split = "fixed"
+        ## all to test.
+        # split = "test"
         seed = 0
         feat = f"_ABS_DATAFLOW_{sfeat}_all_limitall_{limitall}_limitsubkeys_{limitsubkeys}"
         dst_file = svd.processed_dir() / dsname / f"nodes_feat_{feat}_{split}{sample_text}.csv"
