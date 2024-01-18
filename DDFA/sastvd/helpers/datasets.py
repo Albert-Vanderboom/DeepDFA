@@ -510,6 +510,8 @@ def get_splits_map(dsname):
         splits = get_linevul_splits()
     if dsname == "devign":
         splits = get_codexglue_splits()
+    if dsname == "anolis": # use bigvul's splits.
+        splits = get_linevul_splits()
     logger.debug("splits value counts:\n%s", splits.value_counts())
     return splits.to_dict()
 
@@ -554,7 +556,12 @@ def ds_partition(
     """Filter to one partition of bigvul and rebalance function-wise"""
     logger.debug(f"ds_partition %d %s %s %d", len(df), dsname, partition, seed)
 
-    if split == "random":
+    # add no partition: all is for test.
+    if split == "test":
+        df["label"]="test"
+        return df
+    
+    elif split == "random":
         logger.debug("generating random splits with seed %d", seed)
         splits_map = get_splits_map(dsname)
         df_fixed_splits = df.id.map(splits_map)

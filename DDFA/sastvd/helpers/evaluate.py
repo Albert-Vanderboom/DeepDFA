@@ -254,6 +254,24 @@ def get_dep_add_lines_bigvul(dataset, cache=True, sample=False):
         pkl.dump(lines_dict, f)
     return lines_dict
 
+def get_dep_add_lines_anolis(dataset, cache=True, sample=False):
+    """Cache dependent added lines for a dataset."""
+    saved = (
+        svd.get_dir(svd.processed_dir()/dataset/"eval")
+        / f"statement_labels{'_sample' if sample else ''}.pkl"
+    )
+    if os.path.exists(saved) and cache:
+        with open(saved, "rb") as f:
+            return pkl.load(f)
+    df = svdd.anolis()
+    df = df[df.vul == 1]
+    desc = "Getting dependent-added lines: "
+    lines_dict = svd.dfmp(df, helper, ["id", "removed", "added"], ordr=False, desc=desc)
+    lines_dict = dict(lines_dict)
+    with open(saved, "wb") as f:
+        pkl.dump(lines_dict, f)
+    return lines_dict
+
 
 # def get_dep_add_lines_bigvul(cache=True, sample=False):
 #     return get_dep_add_lines("bigvul", cache, sample)

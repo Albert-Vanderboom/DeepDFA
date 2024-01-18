@@ -27,9 +27,10 @@ df = svdds.ds_filter(
 print(df)
 
 #%%
-if dsname == "bigvul":
+if dsname in ["bigvul", "anolis"]:
     graph_type = "cfg"
-    dep_add_lines = ivde.get_dep_add_lines_bigvul("bigvul", sample=sample_mode)
+    dep_add_lines = ivde.get_dep_add_lines_bigvul("bigvul", sample=sample_mode) if dsname == "bigvul" \
+               else ivde.get_dep_add_lines_anolis("anolis", sample=sample_mode)
     dep_add_lines = {k: set(list(v["removed"]) + v["depadd"]) for k, v in dep_add_lines.items()}
 
     def get_vuln(lineno, _id, dep_add_lines):
