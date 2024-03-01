@@ -1,5 +1,5 @@
 LineVul/data/
-./models/
+models/
 ./logs/
 README.artifact-evaluation.md
 *.zip
